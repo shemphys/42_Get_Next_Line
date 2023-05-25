@@ -1,0 +1,63 @@
+ARCHIVOS A ENTREGAR
+get_next_line.c
+get_next_line_utils.c
+get_next_line.h
+
+PROTOTIPO
+char *get_next_line(int fd);
+
+fd: File descriptor del que leer
+
+VALOR DEVUELTO
+Si todo va bien: la línea leída
+En caso de fallo o si la lectura termina: NULL
+
+FUNCIONES AUTORIZADAS
+read, malloc, free
+
+DESCRIPCIÓN
+Escribe una función que devuelva la línea leída de
+un file descriptor
+
+------------------------------
+Llamar a la función get_next_line de manera repetida (por ejemplo, usando un bucle) te permitirá leer el contenido del archivo hacia el que apunta el file descriptor (fd), línea a línea, hasta el final.
+
+La función deberá devolver la línea que se acaba de leer. Si no hay nada más que leer o si ha ocurrido un error deberá devolver NULL
+
+Asegúrate de que la función se comporta adecuadamente cuando lea de un archivo y cuando lea de un stdin.
+
+Ten en cuenta que la línea devuelta debe terminar con el caracter n, excepto si se ha llegado al final del archivo y éste no termina con un caracter n.
+
+En el header get_next_line.h deberás tener como mínimo el prototipo de la función get_next_line.
+
+Añade todas las funciones de ayuda que necesites en el archivo get_next_line_utils.c
+
+El programa debe compilar con el flag -D BUFFER_SIZE=xx. Este flag se utilizará par determinar el tamaño del buffer de las lecturas del get_next line(). Este parámetro será modificado para probar el programa.
+Se debe poder compilar con y si el flag -D BUFFER_SIZE, jujnto a los flags habituales.
+
+El programa se compilará de la siguiente forma cc -Wall -Werror -Wextra -D BUFFER_SIZE=42 <archivos>.c
+
+Se considera que get_next_line() tiene un comportamiento indeterminado si el
+archivo al que apunta el fd ha cambiado desde la última vez que se llamó, siempre
+que read() no haya llegado al final del archivo
+
+Se considera que get_next_line() tiene un comportamiento indeterminado cuando lo que se lee es un archivo binario. Sin embargo, puedes inmplementar alguna
+manera lógica de sortear este problema, si quieres
+
+Se prohibe la utilización de lseek
+Se prohibe la utilización de variables globales
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
