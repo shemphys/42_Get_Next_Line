@@ -5,46 +5,52 @@
 #define BUFFER_SIZE 42
 #endif
 
-char *get_next_line(int fd)
-{
-    static char *buffer;
-    char *line;
-    ssize_t read_bytes;
-    size_t i, j;
+char *str_append(char *line, char *buffer, size_t len) {
+	size_t i = 0;
+	size_t line_len = 0;
+	size_t j = 0;
 
-    if (!buffer) {
-        buffer = malloc((BUFFER_SIZE + 1) * sizeof(char));
-        if (!buffer) return NULL; // Fallo de memoria
-    }
+	if (line) {
+		while (line[line_len])
+			line_len++;
+	}
+	char *new_line = malloc((line_len + len + 1) * sizeof(char));
+	if (!new_line) return NULL;
+	while (line && line[i]) {
+		new_line[i] = line[i];
+		i++;
+	}
+	while (j < len) {
+		new_line[i + j] = buffer[j];
+		j++;
+	}
+	new_line[i + j] = '\0';
+	free(line);
+	return new_line;
+}
 
-    while (1) {
-        read_bytes = read(fd, buffer, BUFFER_SIZE);
-        if (read_bytes < 0) return NULL; // Error de lectura
+char *get_next_line(int fd) {
+	static char buffer[BUFFER_SIZE + 1];
+	char *line = NULL;
+	ssize_t read_bytes;
+	size_t i;
+	size_t j;
 
-        buffer[read_bytes] = '\0'; // Asegurarse de que el buffer es una cadena válida
+	while ((read_bytes = read(fd, buffer, BUFFER_SIZE)) >= 0) {
+		buffer[read_bytes] = '\0';
 
-        // Buscar una línea en el buffer
-        for (i = 0; buffer[i] != '\n' && buffer[i] != '\0'; i++);
+		for (i = 0; i < read_bytes && buffer[i] != '\n'; i++);
 
-        // Si se ha encontrado una línea...
-        if (buffer[i] == '\n' || (i > 0 && buffer[i] == '\0' && read_bytes == 0)) {
-            line = malloc((i + 2) * sizeof(char)); // Reservar espacio para la línea y '\n' y '\0'
-            if (!line) return NULL; // Fallo de memoria
+		line = str_append(line, buffer, i);
+		if (!line) return NULL;
 
-            for (j = 0; j < i; j++)
-                line[j] = buffer[j];
-
-            line[j++] = '\n'; // Añadir '\n' al final de la línea
-            line[j] = '\0'; // Terminar la cadena
-
-            // Desplazar el contenido restante del buffer al inicio
-            for (j = 0; buffer[i] != '\0'; j++, i++)
-                buffer[j] = buffer[i];
-            buffer[j] = '\0';
-
-            return line;
-        }
-        
-        if (read_bytes == 0) return NULL; // Final del archivo
-    }
+		if (i < read_bytes && buffer[i] == '\n') {
+			for (j = i + 1; j <= read_bytes; j++)
+				buffer[j - i - 1] = buffer[j];
+			return line;
+		}
+		if (read_bytes < BUFFER_SIZE) return line;
+	}
+	free(line);
+	return NULL;
 }
