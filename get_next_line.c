@@ -20,6 +20,15 @@ t_fragment *fragment_create(char *data, size_t len) {
     return frag;
 }
 
+void free_fragments(t_fragment *head) {
+    t_fragment *tmp;
+    while (head) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+}
+
 char *get_next_line(int fd) {
     static char buffer[BUFFER_SIZE + 1];
     char *line = NULL;
@@ -34,6 +43,7 @@ char *get_next_line(int fd) {
             read_bytes = read(fd, buffer + buffer_len, BUFFER_SIZE - buffer_len);
             if (read_bytes < 0) {
                 free(line);
+                free_fragments(head); // Clean up the list of fragments
                 return NULL; // Reading error
             }
             buffer_len += read_bytes;
@@ -51,7 +61,11 @@ char *get_next_line(int fd) {
         if (i < buffer_len && buffer[i] == '\n' || read_bytes == 0) {
             // Create a new fragment with the buffer's content
             frag = fragment_create(buffer, i);
-            if (!frag) return NULL; // Memory error
+            if (!frag) {
+                free(line);
+                free_fragments(head); // Clean up the list of fragments
+                return NULL; // Memory error
+            }
 
             // Add the fragment to the list
             if (!head) head = frag;
@@ -64,13 +78,19 @@ char *get_next_line(int fd) {
                 // Special case for empty line
                 if (line_len == 0) {
                     line = malloc(1 * sizeof(char));
-                    if (!line) return NULL; // Memory error
+                    if (!line) {
+                        free_fragments(head); // Clean up the list of fragments
+                        return NULL; // Memory error
+                    }
                     *line = '\0';
                     return line;
                 }
                 // Combine all fragments into the final line
                 line = malloc((line_len + 1) * sizeof(char));
-                if (!line) return NULL; // Memory error
+                if (!line) {
+                    free_fragments(head); // Clean up the list of fragments
+                    return NULL; // Memory error
+                }
 
                 char *ptr = line;
                 while (head) {
@@ -96,8 +116,9 @@ char *get_next_line(int fd) {
             buffer_len -= i;
         }
 
-        if (read_bytes == 0)
+        if (read_bytes == 0) {
+            free_fragments(head); // Clean up the list of fragments
             return NULL; // End of file
+        }
     }
 }
-
