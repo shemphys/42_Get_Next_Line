@@ -61,6 +61,13 @@ char *get_next_line(int fd) {
 
             // If a newline was found...
             if (i < buffer_len && buffer[i] == '\n') {
+                // Special case for empty line
+                if (line_len == 0) {
+                    line = malloc(1 * sizeof(char));
+                    if (!line) return NULL; // Memory error
+                    *line = '\0';
+                    return line;
+                }
                 // Combine all fragments into the final line
                 line = malloc((line_len + 1) * sizeof(char));
                 if (!line) return NULL; // Memory error
@@ -93,3 +100,4 @@ char *get_next_line(int fd) {
             return NULL; // End of file
     }
 }
+
