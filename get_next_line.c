@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -12,7 +11,8 @@ typedef struct s_fragment {
     struct s_fragment *next;
 } t_fragment;
 
-t_fragment *fragment_create(char *data, size_t len) {
+t_fragment *fragment_create(char *data, size_t len)
+{
     t_fragment *frag = malloc(sizeof(t_fragment));
     if (!frag) return NULL;
     frag->data = data;
@@ -21,105 +21,122 @@ t_fragment *fragment_create(char *data, size_t len) {
     return frag;
 }
 
-void free_fragments(t_fragment *head) {
+void free_fragments(t_fragment *head)
+{
     t_fragment *tmp;
-    while (head) {
+    while (head)
+	{
         tmp = head;
         head = head->next;
         free(tmp);
     }
 }
 
-char *get_next_line(int fd) {
+char *get_next_line(int fd)
+{
     static char buffer[BUFFER_SIZE + 1];
     char *line = NULL;
     ssize_t read_bytes;
-    size_t i, j, buffer_len = 0;
+    size_t i = 0, j = 0, buffer_len = 0;
     t_fragment *head = NULL, *tail = NULL, *frag;
     size_t line_len = 0;
 
-    while (1) {
-        // Keep reading until buffer is full or a newline is found
-        while (buffer_len < BUFFER_SIZE && buffer[buffer_len] != '\n') {
+    while (1)
+	{
+        while (buffer_len < BUFFER_SIZE && buffer[buffer_len] != '\n')
+		{
             read_bytes = read(fd, buffer + buffer_len, BUFFER_SIZE - buffer_len);
             if (read_bytes < 0) {
                 free(line);
-                free_fragments(head); // Clean up the list of fragments
-                return NULL; // Reading error
+                free_fragments(head);
+                return NULL;
             }
             buffer_len += read_bytes;
 
             if (read_bytes == 0)
-                break; // End of file
+                break;
         }
 
-        buffer[buffer_len] = '\0'; // Ensure the buffer is a valid string
+        buffer[buffer_len] = '\0';
 
-        // Find a newline in the buffer
-        for (i = 0; i < buffer_len && buffer[i] != '\n'; i++);
+        i = 0;
+        while (i < buffer_len && buffer[i] != '\n') i++;
 
-        // If a newline was found or end of file reached...
-        if (i < buffer_len && buffer[i] == '\n' || read_bytes == 0) {
-            // Create a new fragment with the buffer's content
+        if (i < buffer_len && buffer[i] == '\n' || read_bytes == 0)
+		{
             frag = fragment_create(buffer, i);
             if (!frag) {
                 free(line);
-                free_fragments(head); // Clean up the list of fragments
-                return NULL; // Memory error
+                free_fragments(head);
+                return NULL;
             }
 
-            // Add the fragment to the list
-            if (!head) head = frag;
-            if (tail) tail->next = frag;
+            if (!head)
+				head = frag;
+            if (tail)
+				tail->next = frag;
             tail = frag;
             line_len += frag->len;
 
-            // If a newline was found...
-            if (i < buffer_len && buffer[i] == '\n') {
-                // Special case for empty line
-                if (line_len == 0) {
+            if (i < buffer_len && buffer[i] == '\n')
+			{
+                if (line_len == 0)
+				{
                     line = malloc(1 * sizeof(char));
-                    if (!line) {
-                        free_fragments(head); // Clean up the list of fragments
-                        return NULL; // Memory error
+                    if (!line)
+					{
+                        free_fragments(head);
+                        return NULL;
                     }
                     *line = '\0';
                     return line;
                 }
-                // Combine all fragments into the final line
                 line = malloc((line_len + 1) * sizeof(char));
-                if (!line) {
-                    free_fragments(head); // Clean up the list of fragments
-                    return NULL; // Memory error
+                if (!line)
+				{
+                    free_fragments(head);
+                    return NULL;
                 }
 
                 char *ptr = line;
-                while (head) {
+                while (head)
+				{
                     frag = head;
-                    for (j = 0; j < frag->len; j++)
+                    j = 0;
+                    while (j < frag->len)
+					{
                         *(ptr++) = frag->data[j];
+                        j++;
+                    }
                     head = frag->next;
                     free(frag);
                 }
                 *ptr = '\0';
 
-                // Shift remaining buffer content to the beginning
-                for (j = 0; buffer[i] != '\0'; j++, i++)
+                j = 0;
+                while (buffer[i] != '\0')
+				{
                     buffer[j] = buffer[i];
+                    j++; i++;
+                }
                 buffer_len -= i;
 
                 return line;
             }
 
-            // Shift remaining buffer content to the beginning
-            for (j = 0; buffer[i] != '\0'; j++, i++)
+            j = 0;
+            while (buffer[i] != '\0')
+			{
                 buffer[j] = buffer[i];
+                j++; i++;
+            }
             buffer_len -= i;
         }
 
-        if (read_bytes == 0) {
-            free_fragments(head); // Clean up the list of fragments
-            return NULL; // End of file
+        if (read_bytes == 0)
+		{
+            free_fragments(head);
+            return NULL;
         }
     }
 }
