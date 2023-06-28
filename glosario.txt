@@ -1,2 +1,2 @@
-Buffer: "variable" temporal
+Buffer: "variable" temporal.
 
