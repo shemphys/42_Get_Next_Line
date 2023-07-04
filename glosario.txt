@@ -9,3 +9,29 @@ una función puntero devuelve un puntero del mismo tipo que la función
  a menudo se usa para devolver cadenas de char, porque es lo mismo un
  array de char que un puntero apuntando al inicio del array.
 
+
+#include <unistd.h> 
+
+char first_char(int fd) {
+    char c;
+    ssize_t result = read(fd, &c, 1);
+    if (result == 0) {
+        // El archivo estaba vacío, devolver un carácter nulo.
+        return '\0';
+    } else if (result == -1) {
+        // Hubo un error al leer el archivo. Deberías manejar este caso según tus necesidades.
+        // Aquí simplemente devolvemos un carácter nulo.
+        return '\0';
+    } else {
+        // Devolver el primer carácter.
+        return c;
+    }
+}
+
+La función read(a, b, c) pide 3 argumentos (similar a write()):
+ a. Dónde (file descriptor)
+ b. direccion de memoria
+ c. cantidad de bytes
+
+ marcoapunto
+    almacena TODO el documento en la estática
