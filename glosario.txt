@@ -1,2 +1,11 @@
 Buffer: "variable" temporal.
 
+una variable estática (X) se queda iniciada el tiempo que dure vivo el programa
+ de esta forma, aunque la función que contenga X se termine, si el programa
+ continua y vuelve a llamar a la función que contenía X, X no se volverá a iniciar
+ y partirá del mismo valor en el que se quedó.
+
+una función puntero devuelve un puntero del mismo tipo que la función
+ a menudo se usa para devolver cadenas de char, porque es lo mismo un
+ array de char que un puntero apuntando al inicio del array.
+
