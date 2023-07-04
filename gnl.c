@@ -19,16 +19,23 @@ char *get_next_line(int fd)
 	i = 0;
 	if (!fd)
 		return (NULL);
-	while (!file_check || !buffer)
-	{
-		file_check = read(fd, &buffer, BUFFER_SIZE);//estoy hay que hacerlo bucle, o solo leeré BUFFER_SIZE bytes.
+	while (!file_check || !buffer)//podria ahorrarme una línea haciendo modificando este paréntesis?
+	{//		(!read(fd, &buffer, BUFFER_SIZE) || !buffer)	Esto hace la asignación en buffer?? puedo usarlo??
+		file_check = read(fd, &buffer, BUFFER_SIZE);//esto hay que hacerlo bucle, o solo leeré BUFFER_SIZE bytes.
 		if (!file_check || !buffer)
 			return (NULL);
-		ft_strjoin(paahora, buffer);
+		while (buffer[i] != '\n' || !buffer[i])	//ahora vamos a comprobar que no haya saltos de línea
+			i++;
+		if (i == ft_strlen(buffer))//si no existen saltos de línea, meto todo el buffer en paahora
+			ft_strjoin(paahora, buffer);
+		else
+		{
+			ft_strncpy(paahora + ft_strlen(paahora), buffer, i);//esto concatenará i char de buffer en paahora.
+			paahora[ft_strlen + 1] = '\0';
+			//ahora tengo que rellenar *paluego con lo que sobre que siga conteniendo buffer
+			if (i < BUFFER_SIZE && buffer[BUFFER_SIZE] != '\0')//la 2 condición es por si ya hemos leído todo el documento
+				ft_strncpy(paluego, buffer[i], BUFFER_SIZE - i);//para copiar desde [i] hasta BUFFER_SIZE - 1
+		}
+	return (paahora);
 	}
-	//ahora vamos a comprobar que no haya saltos de línea
-	while (buffer[i] != '\n' || !buffer[i])
-		i++;
-	
-	
 }
