@@ -1,5 +1,5 @@
 
-#include <unistd.h>
+
 #include <unistd.h>
 #include <stdio.h>//printf()
 #include <stdlib.h>//malloc
@@ -87,7 +87,7 @@ char *get_next_line(int fd)
 
 int main(void)
 {
-	int		fd = read("C:/Users/mykje/Documents/GitHub/42_Get_Next_Line/subject.txt", O_RDONLY);
+	int		fd = open("C:/Users/mykje/Documents/GitHub/42_Get_Next_Line/subject.txt", O_RDONLY);
 	char *a = get_next_line(fd);
 	printf("%s", a);
 }
