@@ -1,4 +1,5 @@
 //Las variables locales se destruyen. Los punteros pueden sobrevivir. (?)
+// Miguel añadió un OPEN_MAX para manejar un error: el máximo que puede abrir open()
 
 #include <unistd.h>
 #include <stdlib.h>//malloc(), free()
@@ -8,6 +9,16 @@
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 7
 #endif
+
+size_t	ft_strlen(const char *str)
+{
+	size_t	i;
+
+	i = 0;
+	while (str[i] != '\0')
+		i++;
+	return (i);
+}
 
 char *get_next_line(int fd)
 {
@@ -26,20 +37,22 @@ char *get_next_line(int fd)
 	stash = malloc(sizeof(char) * BUFFER_SIZE + 1);
 	while (i < BUFFER_SIZE && buffer[i])
 	{
-		if (buffer[i] == '\n')//objetivo: almacenar todo el bufer dentro de stash, pero salir del bucle
-			{
-				while (i < BUFFER_SIZE && buffer[i])
-				{
-					stash[i] = buffer[i];
-					i++;
-				}
-				break;//quizás puedo meter aquí el return de una 
-			}
 		stash[i] = buffer[i];
 		i++;
 	}
-
-	return(stash);
+	stash[i] = '\0';
+	//ahora que meter stash en line hasta el '\n'
+	
+	line = malloc(sizeof(char) * ft_strlen(stash) + 1);
+	i = 0;
+	while (stash[i] != '\0')
+	{
+		line[i] = stash[i];
+		i++;
+	}
+	line[i] = '\0';
+	free(stash);
+	return (line);
 }
 
 int main(void)
@@ -52,3 +65,6 @@ int main(void)
 	free(aux);
 	return(0);
 }
+//MOVIDAS
+// si trozo que leo justo termina en el salto de línea
+// al mostrarlo por por pantalla No muestra nada.
