@@ -26,16 +26,23 @@ char *get_next_line(int fd)
 	char		*line;
 	char		buffer[BUFFER_SIZE + 1];//un array normalito, sin más
 	int			i;
+	int			bytes_read;
 
 	i = 0;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 
-	read(fd, buffer, BUFFER_SIZE);
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	if (bytes_read < 0)
+		return (NULL);
 
-	stash = malloc(sizeof(char) * BUFFER_SIZE + 1);
-	while (i < BUFFER_SIZE && buffer[i])
+	buffer[bytes_read] = '\0';
+
+/* 	stash = malloc(sizeof(char) * bytes_read + 1);
+	if (!stash)
+		return (NULL); */
+	while (i < bytes_read && buffer[i] != '\0')
 	{
 		stash[i] = buffer[i];
 		i++;
@@ -44,14 +51,21 @@ char *get_next_line(int fd)
 	//ahora que meter stash en line hasta el '\n'
 	
 	line = malloc(sizeof(char) * ft_strlen(stash) + 1);
+	if (!line)
+	{
+		free(stash);
+		return (NULL);
+	}
+
 	i = 0;
-	while (stash[i] != '\0')
+	while (stash[i] != '\0' && stash[i] != '\n')
 	{
 		line[i] = stash[i];
 		i++;
 	}
 	line[i] = '\0';
-	free(stash);
+	free(stash);//esto habrá que quitarlo después que no hay que liberar esta memoria
+				//de hecho habrá que limpiar el trozo posterior a \n
 	return (line);
 }
 
