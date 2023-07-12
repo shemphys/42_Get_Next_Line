@@ -1,18 +1,16 @@
-
+//Las variables locales se destruyen. Los punteros pueden sobrevivir. (?)
+// Miguel añadió un OPEN_MAX para manejar un error: el máximo que puede abrir open()
 
 #include <unistd.h>
+#include <stdlib.h>//malloc(), free()
 #include <stdio.h>//printf()
-#include <stdlib.h>//malloc
-#include <string.h>//strncpy
+#include <fcntl.h>//open(), O_RDONLY
 
 #ifndef BUFFER_SIZE
-#define BUFFER_SIZE 42
+#define BUFFER_SIZE 1
 #endif
 
-////////////////////////UTILS//////////////////////////
-
-
-int	ft_strlen(const char *str)
+size_t	ft_strlen(const char *str)
 {
 	size_t	i;
 
@@ -22,72 +20,58 @@ int	ft_strlen(const char *str)
 	return (i);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
-{
-	size_t	i;
-	size_t	j;
-	char	*destino;
-
-	j = 0;
-	i = 0;
-	if (!s1 || s2 == NULL)
-		return (NULL);
-	destino = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
-	if (!destino)
-		return (NULL);
-	while (s1[i] != '\0')
-	{
-		destino[i] = s1[i];
-		i++;
-	}
-	while (s2[j] != '\0')
-	{
-		destino[i + j] = s2[j];
-		j++;
-	}
-	destino[i + j] = '\0';
-	return (destino);
-}
-//////////////////////////////////////////////////
-
-
-//la función open() devuelve un int, que es lo que me van a pasar.
-
 char *get_next_line(int fd)
 {
-	static char	*paluego;//lo que me guardo para la siguiente iterancia jiji
-	char		*paahora;//lo que devuelvo en cada iterancia
-	int			file_check;//compruebo que la asignación se haya hecho bien
-	char		buffer[BUFFER_SIZE + 1];//un buffer no es más que un array?...vaya decepción
-	int			i;//contador para recorrer el array buffer
-	
+	static char	*stash;
+	char		*line;
+	char		buffer[BUFFER_SIZE + 1];//un array normalito, sin más
+	int			i;
+	int			bytes_read;
+
 	i = 0;
-	if (!fd)
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	while (!file_check || !buffer)//podria ahorrarme una línea haciendo modificando este paréntesis?
-	{//		(!read(fd, &buffer, BUFFER_SIZE) || !buffer)	Esto hace la asignación en buffer?? puedo usarlo??
-		file_check = read(fd, &buffer, BUFFER_SIZE);//esto hay que hacerlo bucle, o solo leeré BUFFER_SIZE bytes.
-		if (!file_check || !buffer)
-			return (NULL);
-		while (buffer[i] != '\n' || !buffer[i])	//ahora vamos a comprobar que no haya saltos de línea
-			i++;
-		if (i == ft_strlen(buffer))//si no existen saltos de línea, meto todo el buffer en paahora
-			ft_strjoin(paahora, buffer);
-		else
-		{
-			strncpy(paahora + ft_strlen(paahora), buffer, i);//esto concatenará i char de buffer en paahora.
-			paahora[ft_strlen + 1] = '\0';
-			//ahora tengo que rellenar *paluego con lo que sobre que siga conteniendo buffer
-			if (i < BUFFER_SIZE && buffer[BUFFER_SIZE] != '\0')//la 2 condición es por si ya hemos leído todo el documento
-				strncpy(paluego, buffer[i], BUFFER_SIZE - i);//para copiar desde [i] hasta BUFFER_SIZE - 1
-		}
-	return (paahora);
+
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	if (bytes_read < 0)
+		return (NULL);
+
+	buffer[bytes_read + 1] = '\0';
+	printf("%s", buffer);
+	while (i < bytes_read && !buffer[i])
+	{
+		stash[i] = buffer[i];
+		i++;
 	}
+	stash[i] = '\0';
+	//ahora que meter stash en line hasta el '\n'
+	
+	line = malloc(sizeof(char) * ft_strlen(stash) + 1);
+	if (!line)
+		return (NULL);
+
+	i = 0;
+	while (stash[i] != '\0' && stash[i] != '\n')
+	{
+		line[i] = stash[i];
+		i++;
+	}
+	line[i] = '\0';
+	return (line);
 }
 
 int main(void)
 {
-	int		fd = open("C:/Users/mykje/Documents/GitHub/42_Get_Next_Line/subject.txt", O_RDONLY);
-	char *a = get_next_line(fd);
-	printf("%s", a);
+	char	*aux;
+	//int		fd = open("C:/Users/mykje/Documents/GitHub/42_Get_Next_Line/testeo", O_RDONLY);
+	int		fd = open("/Users/mparedes/Documents/get_next_line/testeo", O_RDONLY);
+
+	aux = get_next_line(fd);
+	printf("%s", aux);
+	free(aux);
+	return(0);
 }
+//MOVIDAS
+// si trozo que leo justo termina en el salto de línea
+// al mostrarlo por por pantalla No muestra nada.
