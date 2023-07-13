@@ -12,12 +12,13 @@
 # include <stdlib.h>
 # include <stdio.h>//TODO
 
-typedef struct s_list
+typedef struct		s_list
 {
-	char            *str_buf;
-	struct s_list   *next;
+	char			*str_buff;
+	struct s_list	*next;
 }                   t_list;
 
-char    *get_next_line(int fd):
+char	*get_next_line(int fd);
+void	crete_list(t_list **list, int fd);
 
 #endif
