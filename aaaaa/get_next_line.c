@@ -34,7 +34,7 @@ void	crete_list(t_list **list, int fd)
 			return ;
 		}
 		buff[char_read] = '\0';
-		append(list, buff, fd);
+		append(list, buff);
 	}
 }
 
