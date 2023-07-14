@@ -17,30 +17,31 @@ void	append(t_list **list, char *buff)
 	new_node->next = NULL;
 }
 
-void	crete_list(t_list **list, int fd)
+void	create_list(t_list **list, int fd)
 {
 	int		char_read;
 	char	*buff;
 
-	while (!found_newline(*list))
+	while (!found_newline(*list))//¿por qué para cuando devuelve 1??
 	{
 		buff = malloc(BUFFER_SIZE + 1);
 		if (!buff)
-			return;
+			return ;
 		char_read = read(fd, buff, BUFFER_SIZE);
 		if (!char_read)
 		{
 			free(buff);
 			return ;
 		}
-		buff[char_read] = '\0';
+		buff[char_read] = '\0';//si usase BUFFER_SIZE como punto donde poner \0
+		//habría veces que quedaría mierda entre la string y el nulo.
 		append(list, buff);
 	}
 }
 
 char	*get_next_line(fd)
 {
-	static t_list	*list;
+	static t_list	*list;//nodo cabeza
 	char			*next_line;
 
 	list = NULL;//está bien hacer esto porque a lo mejor en el if se va a tomar por culo y es un static
@@ -83,4 +84,11 @@ char	*get_next_line(fd)
  - limpieza de nodos
 
 ale, pogramar crack! :D
+*/
+
+/*
+ La diferencia entre bonus y nobonus es que en bonus sabemos que habrá
+  más fd, de forma que tendremos que crear instancias distintas según el fd.
+ Usaremos la librería limits.h y OPEN_MAX, porque dependiendo del sistema
+  éste tendrá un límite u otro. Es más óptimo esto que poner un número "a lo loco"
 */
