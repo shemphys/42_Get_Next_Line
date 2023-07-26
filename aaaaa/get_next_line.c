@@ -39,13 +39,13 @@ void	create_list(t_list **list, int fd)
 	}
 }
 
-char	*get_next_line(fd)
+char	*get_next_line(int fd)
 {
 	static t_list	*list;//nodo cabeza
 	char			*next_line;
 
 	list = NULL;//está bien hacer esto porque a lo mejor en el if se va a tomar por culo y es un static
-	if (fd < 0 || BUFFER_SIZE <=0 || read(fd, &next_line, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 	//compruebo que el fd está bien, que el bs está bien y que podemos leer.
 	//ssize_t read(int fd, void *buf, size_t count);
 	//como solo puedo leer 1 vez, cada cosa, count debe ser 0
