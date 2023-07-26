@@ -58,7 +58,6 @@ char	*get_next_line(fd)
 	return(next_line);
 }
 
-
 /*
  Uso OPEN_MAX de limits.h para poder capturar tantos fd simultáneamente como sea necesario. [bonus]
  

@@ -20,5 +20,6 @@ typedef struct		s_list
 
 char	*get_next_line(int fd);
 void	crete_list(t_list **list, int fd);
+int		found_newline(t_list *list);
 
 #endif
