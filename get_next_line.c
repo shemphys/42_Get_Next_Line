@@ -1,115 +1,92 @@
 #include "get_next_line.h"
 
-int len_to_newline(t_list *list)
+t_list *create_new_node(int fd)
 {
-	int	i;
-	int	len;
-
-	if (!list)
-		return (0);
-	len = 0;
-	while (list)
-	{
-		i = 0;
-		while (list->str_buf[i])
-		{
-			
-		}
-		
-	}
-}
-
-char *get_line(t_list *list)
-{
-	int		str_len;
-	char	*next_str;
-
-	if (!list)
-		return (NULL);
-	str_len = len_to_newline(list);
-	/* aaaaaaaaaaaaaaaaa */
-}
-
-t_list *find_last_node(t_list *list)
-{
-	if (!list)
-		return (NULL);
-	while (list->next)
-		list = list->next;
-	return (list);
-}
-
-void append(t_list **list, char *buffer)
-{
-	t_list	*new_node;
-	t_list	*last_node;
-
-	last_node = find_last_node(*list);
-	new_node = malloc(sizeof(t_list));
-	if (!new_node)
-		return ;
-	if (!last_node)
-		*list = new_node;
-	else
-		last_node->new = new_node;
-	new_node->str_buf = buffer;
-	new_node->next = NULL;
-}
-
-int found_newline(t_list *list)//finished
-{
-	int	i;
-
-	if (!list)
-		return (0);
-	while (list)
-	{
-		i = 0;
-		while (list->str_vuf[i] && i < BUFFER_SIZE)
-		{
-			if (list->str_buf[i] == '\n')
-				return (1);
-			++i;//i++;??
-		}
-		list = list->next;
-	}
-	return (0);
-}
-
-/* ¿Por qué doble puntero? */
-void create_list(t_list **list, int fd)//finished
-{
+	t_list	*new;
 	int		char_read;
-	char	*buffer;
 
-	while (!found_newline(*list))
+	new = malloc(sizeof(t_list));
+	if (!new)
+		return (NULL);	
+	new->fd = fd;
+	char_read = read(fd, new->buffer, BUFFER_SIZE);
+	if (!char_read)
 	{
-		buffer = malloc(BUFFER_SIZE + 1);
-		if (!buffer)
-			return ;
-		char_read = read(fd, buffer, BUFFER_SIZE);
-		if (!char_read)
-		{
-			free(buffer);
-			return ;
-		}
-		buffer[char_read] =  '\0';
-		append(list, buf);
+		free(new);
+		return (NULL);
 	}
+	new->buffer[BUFFER_SIZE] = '\0';
+	new->next = NULL;
+	return (new);
+}
+
+t_list *get_or_add_node(t_list **head, int fd)
+{//buscar si existe por el identificador fd. Si no existe: crear y añadir
+	t_list	*aux;
+	t_list	*prev;
+	t_list	*new;
+
+	aux = *head;
+	prev = NULL;
+	while (aux)
+	{
+		if (aux->fd == fd)
+			return (aux);
+		prev = aux;
+		aux = aux->next;
+	}
+	new = create_new_node(fd);//falta añadir la línea.
+	if (!new)
+		return (NULL);
+	if (prev)//necesito que prev apunte a NULL
+		prev->next = new;
+	else//porque sino significa que solo había un nodo: head
+		*head = new;
+	return (new);
+}
+
+//bucle que checkea si existe '\n' en el buffer
+int newlinefinder(char *line)
+{
+	char	*aux;
+
+	if (line == NULL)
+		return (NULL);
+	aux = line;
+	while (aux != NULL)
+	{
+		if (*aux == '\n')
+			return (1);
+		aux++;
+	}
+	return (0);//no hay saltos de línea
 }
 
 char *get_next_line(int fd)
 {
-	static t_list	*list;//= NULL; creo que no puedo usar esto aquí
-	char			*next_line
+	t_list	*head;
+	t_list	*aux;
+	char	*output_line;
 
-	*list = NULL;
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &next_line, 0) < 0)
-		return NULL;
-	create_list(&list, fd);
-	if (!list)
+	head = NULL;
+	if (read(fd, 0, 0) || BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
-	next_line = get_line(list);
-	/* aaaaaaaaaaaa */
+	
+	while (newlinefinder(aux) == 0)
+		aux = get_or_add_node(&head, fd);
+	//si salimos de este bucle -> aux contiene '\n'
+	
+	output_line = 
+
+
+
+	//aquí tengo que proteger que *head o fd vayan con condimento.
+	//FREE
 }
 
+
+
+//INSTRUCCIONES
+// -> liberar memoria
+
+// encontrar '\n'
