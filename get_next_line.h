@@ -13,7 +13,6 @@
 
 typedef struct		s_list
 {
-	int				fd;
 	char			buffer[BUFFER_SIZE + 1];
 	struct s_list	*next;
 }					t_list;

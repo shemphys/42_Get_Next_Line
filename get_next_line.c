@@ -7,8 +7,7 @@ t_list *create_new_node(int fd)
 
 	new = malloc(sizeof(t_list));
 	if (!new)
-		return (NULL);	
-	new->fd = fd;
+		return (NULL);
 	char_read = read(fd, new->buffer, BUFFER_SIZE);
 	if (!char_read)
 	{
@@ -30,8 +29,6 @@ t_list *get_or_add_node(t_list **head, int fd)
 	prev = NULL;
 	while (aux)
 	{
-		if (aux->fd == fd)
-			return (aux);
 		prev = aux;
 		aux = aux->next;
 	}
@@ -62,21 +59,52 @@ int newlinefinder(char *line)
 	return (0);//no hay saltos de línea
 }
 
+//necesito saber cómo de grande será output_line
+int ft_len_to_newline(t_list *head, int fd)
+{
+	int	i;
+	int	len;
+	//creo que debería crear AUX para no perder la cabeza xD
+
+	if (head == NULL)
+		return (0);
+	len = 0;
+	while (head)
+	{
+		i = 0;
+		while (head->buffer[i] != '\0')
+		{
+			if (head->buffer[i] == '\n')
+			{
+				len++;
+				return (len);
+			}
+			i++;
+			len++;
+		}
+		head = head->next;
+	}
+	return (len);//no sé si debería meterle un +1 xD
+}
+
+//concatena: va guardando la info en output_line + update ->next + free()
+
+
 char *get_next_line(int fd)
 {
-	t_list	*head;
+	static t_list	*head;//static holdea la info cuanto dure el main
 	t_list	*aux;
 	char	*output_line;
 
 	head = NULL;
 	if (read(fd, 0, 0) || BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
-	
+	//creamos lista y vamos almacenando
 	while (newlinefinder(aux) == 0)
-		aux = get_or_add_node(&head, fd);
+		aux = get_or_add_node(&head, fd);//y busco '\n'
 	//si salimos de este bucle -> aux contiene '\n'
 	
-	output_line = 
+	output_line = ft_concatena()
 
 
 
