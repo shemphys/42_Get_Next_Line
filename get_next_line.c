@@ -36,27 +36,22 @@ t_list *create_new_node(int fd)
 	return (new);
 }
 
-t_list *get_or_add_node(t_list **head, int fd)
-{//buscar si existe por el identificador fd. Si no existe: crear y añadir
+t_list *create_list_or_add(t_list **head, int fd)
+{//1. no hay nodos 2. solo hay un nodo 3.hay varios nodos
 	t_list	*aux;
-	t_list	*prev;
-	t_list	*new;
 
 	aux = *head;
-	prev = NULL;
-	while (aux)
+	if (aux == NULL)//1.
 	{
-		prev = aux;
-		aux = aux->next;
+		*head = create_new_node(fd);
+		return (*head);
 	}
-	new = create_new_node(fd);//falta añadir la línea.
-	if (!new)
-		return (NULL);
-	if (prev)//necesito que prev apunte a NULL
-		prev->next = new;
-	else//porque sino significa que solo había un nodo: head
-		*head = new;
-	return (new);
+	while (aux->next != NULL)//encuentro el último nodo
+		aux = aux->next;
+	//una vez encontrado, añado el nuevo al final
+	aux->next = create_new_node(fd);
+	return (aux->next);
+
 }
 
 //bucle que checkea si existe '\n' en el buffer
@@ -64,11 +59,8 @@ int newlinefinder(char *line)
 {
 	char	*aux;
 
-	//creo que aquí no hay nada que proteger, la verdad
-	//if (line == NULL)
-	//	return ;
 	aux = line;
-	while (aux != '\0')
+	while (*aux != '\0')//45678273985734957634975394753 475 BUCLE INFINITO
 	{
 		if (*aux == '\n')
 			return (1);
@@ -118,24 +110,27 @@ char *get_next_line(int fd)
 	int				b;
 	char			*aux_line;
 
-	head = NULL;
-	if (read(fd, 0, 0) || BUFFER_SIZE <= 0 || fd < 0)
+	if (BUFFER_SIZE <= 0 || fd < 0)//read(fd, 0, 0) || 
 		return (NULL);
 	//creamos lista y vamos almacenando
-	aux = get_or_add_node(&head, fd);
-	while (newlinefinder(aux->buffer) == 0)
-		aux = get_or_add_node(&head, fd);//y busco '\n'
+	aux = create_list_or_add(&head, fd);
+	while (newlinefinder(aux->buffer) == 0)/////////////////////AQUÍ ESTÁ EL ERROR
+		aux = create_list_or_add(&head, fd);//y busco '\n'
 	//si salimos de este bucle -> aux contiene '\n'
 	
 	i = ft_len_until_newline(head);//no es para esto, pero la reutilizo xD
 	output_line = malloc(i + 1);
 	aux_line = malloc(i + 1);
-	if (!output_line)
+	if (!output_line || !aux_line)
 		return (NULL);
 	output_line[i] = '\0';
 	i = 0;
 	//creo la línea y voy borrando los nodos
 	//OJO!! QUE CON ESTO BORRO EL NODO ÚLTIMO QUE NO SIEMPRE
+
+//guarrería porque no entra porque es un caracter nulo, bobo
+output_line[i] = 'a';
+
 	while (output_line[i] != '\0')
 	{
 		aux = head;
@@ -170,7 +165,13 @@ char *get_next_line(int fd)
 
 int main (void)
 {
-	int fd = open("subject.txt", O_RDONLY);
-	printf("%s", get_next_line(fd));
-	close(fd);
+	int a = open("subject.txt", O_RDONLY);
+	int b = open("/Users/mparedes/Documents/get_next_line/subject.txt", O_RDONLY);
+	int c = open("\\Users\\mparedes\\Documents\\get_next_line\\subject.txt", O_RDONLY);//esto vale -1
+	printf("%s", get_next_line(b));
+	printf("\n");
+	//printf("%s", get_next_line(b));
+	close(a);
+	close(b);
+	close(c);
 }
